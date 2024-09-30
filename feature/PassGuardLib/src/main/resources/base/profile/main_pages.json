@@ -1,0 +1,8 @@
+{
+  "src": [
+    "pages/GMSSLDemoPage",
+    "pages/BWPage",
+    "pages/WebPassGuardPage",
+    "pages/RawArgPage"
+  ]
+}

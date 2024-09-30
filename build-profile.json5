@@ -1,0 +1,58 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storePassword": "0000001BEF6095200DFCFEB010DA03B30B9DFD7AF21FCB039166B8F2E0C2E126DA859E850EDE92FCF3610A",
+          "certpath": "../../custom_sign/custom_debug.cer",
+          "keyAlias": "custom_sign",
+          "keyPassword": "0000001B5480672F8AB26264CD397D49C8C154F0055D46BFBF7F927B6351BEEDABC937939C387AE76B3ABF",
+          "profile": "../../custom_sign/demoDebug.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "../../custom_sign/custom_keystore.p12"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.0(12)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PassGuardLib",
+      "srcPath": "./feature/PassGuardLib"
+    }
+  ]
+}

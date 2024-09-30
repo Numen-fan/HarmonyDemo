@@ -1,0 +1,16 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "login_divider_line",
+      "value": "#c2c2c2"
+    },
+    {
+      "name": "page_bg_color",
+      "value": "#F4F4F4"
+    }
+  ]
+}
