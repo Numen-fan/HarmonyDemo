@@ -1,6 +1,10 @@
 import { buffer, util } from '@kit.ArkTS';
-import { Button, router } from '@kit.ArkUI';
+import { Button, promptAction, router } from '@kit.ArkUI';
 import '@feature/passguardlib/src/main/ets/components/PassGuardMainPage'
+import request from '@ohos.request';
+import { UIAbility } from '@kit.AbilityKit';
+import { http } from '@kit.NetworkKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 @Entry
 @Component
@@ -8,6 +12,8 @@ struct Index {
   @State message: string = 'Hello World';
   private iconStr: ResourceStr = $r("app.media.app_icon")
   private idList: string[] = ['123', '123423', '234234', '2342342', '23423423']
+
+  private customDialogComponentId: number = 0
 
   @Builder
   loginIdList(loginIdList: string[]) {
@@ -49,6 +55,35 @@ struct Index {
       this.buildFunctionItem("跳转输入弹窗失焦测试页面", () => {
         router.pushUrl({url:"pages/DialogPage"})
       })
+      this.buildFunctionItem("跳转WebView测试页面", () => {
+        router.pushUrl({url:"pages/WebPage"})
+      })
+      this.buildFunctionItem("promptAction.openCustomDialog", () => {
+        promptAction.openCustomDialog({
+          builder:()=> {
+            this.customDialogComponent()
+          }
+        }).then((id)=> {
+          this.customDialogComponentId = id;
+        })
+      })
+      this.buildFunctionItem("测试文件下载", ()=> {
+        // https://cbankoss.cqrcb.com/private/account/%E5%8D%95%E7%AC%94%E7%94%B5%E5%AD%90%E5%9B%9E%E5%8D%95%E6%89%93%E5%8D%B020241119004030ic9o.png?Expires=1732552831&OSSAccessKeyId=ehwDwSpOhK66fu3M&Signature=LYfr6ywOxudEbundT%2FstN4Hla%2F8%3D&response-cache-control=no-cache
+        request.downloadFile(getContext(), {
+          url: 'https://image.baidu.com/search/down?tn=download&word=download&ie=utf8&fr=home&url=http%3A%2F%2Fgips0.baidu.com%2Fit%2Fu%3D1690853528%2C2506870245%26fm%3D3028%26app%3D3028%26f%3DJPEG%26fmt%3Dauto%3Fw%3D1024%26h%3D1024&thumbUrl=http%3A%2F%2Fgips0.baidu.com%2Fit%2Fu%3D1690853528%2C2506870245%26fm%3D3028%26app%3D3028%26f%3DJPEG%26fmt%3Dauto%3Fw%3D1024%26h%3D1024',
+          filePath:getContext().cacheDir + "/" + Date.now()
+        }).then(task=> {
+          task.on("fail",(err)=> {
+            promptAction.showToast({message: "下载失败 " + err})
+          })
+          task.on("complete", () => {
+            promptAction.showToast({message: "下载成功"})
+          })
+          task.on("progress", (progress)=> {
+            console.warn("progress is " + progress)
+          })
+        })
+      })
     }
     .height('100%')
     .width('100%')
@@ -62,6 +97,21 @@ struct Index {
       .fontWeight(FontWeight.Bold)
       .onClick((e)=> callback())
       .margin({top:10})
+  }
+
+  @Builder
+  customDialogComponent() {
+    Column() {
+      Text('弹窗').fontSize(30)
+      Row({ space: 50 }) {
+        Button("确认").onClick(() => {
+          promptAction.closeCustomDialog(this.customDialogComponentId)
+        })
+        Button("取消").onClick(() => {
+          promptAction.closeCustomDialog(this.customDialogComponentId)
+        })
+      }
+    }.height(200).padding(5).justifyContent(FlexAlign.SpaceBetween)
   }
 
   stringTransfer() {
