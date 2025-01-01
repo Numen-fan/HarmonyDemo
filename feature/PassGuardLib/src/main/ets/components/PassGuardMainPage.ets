@@ -1,4 +1,4 @@
-import { PassGuardInput,OHGmSM2,OHGmSM4 } from '@ohos/libPassGuardSDK';
+import { PassGuardInput,OHGmSM2,OHGmSM4 } from 'passguardlibrary';
 import router from '@ohos.router';
 import '../pages/BWPage'
 import '../pages/GMSSLDemoPage'
@@ -28,7 +28,7 @@ function buildText(params: Params) {
 
 @Entry({routeName:'PassGuardMainPage'})
 @Component
-struct PassGuardMainPage {
+export struct PassGuardMainPage {
   @State message: string = "hello"
 
   @State tipsTxt: string = "";

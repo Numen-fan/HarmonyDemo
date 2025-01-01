@@ -53,6 +53,10 @@
     {
       "name": "PassGuardLib",
       "srcPath": "./feature/PassGuardLib"
+    },
+    {
+      "name": "LearnUnits",
+      "srcPath": "./feature/LearnUnits",
     }
   ]
 }

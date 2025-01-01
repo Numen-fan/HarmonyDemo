@@ -11,7 +11,7 @@ import {
   OHGmSslSetCACertVerifyExpand,
   OHGmSslSetTargetIPPort,
   OHGmSslStartProxy
-} from 'libPassGuardSDK';
+} from 'passguardlibrary';
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');

@@ -8,7 +8,7 @@ import {
   ohGmRSM3HMac,
   ohGmRSM4Encrypt,
   ohGmRSM4Decrypt
-} from '@ohos/libPassGuardSDK';
+} from 'passguardlibrary';
 
 @Entry({routeName: 'RawArgPage'})
 @Component

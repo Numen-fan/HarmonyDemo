@@ -16,7 +16,7 @@
           "consumerFiles": [
             "./consumer-rules.txt"
           ]
-        }
+        },
       },
     },
   ],

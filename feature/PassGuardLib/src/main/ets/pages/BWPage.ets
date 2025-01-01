@@ -5,7 +5,7 @@ import {
   OHTxcEncryptByECBAndHMac,
   OHTxcEncryptByECBAndHMacNoRCCipher,
   OHTxcDecryptByECBAnCheckHmac
-} from '@ohos/libPassGuardSDK';
+} from 'passguardlibrary';
 
 @Entry({routeName: 'BWPage'})
 @Entry

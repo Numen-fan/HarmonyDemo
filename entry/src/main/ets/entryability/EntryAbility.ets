@@ -1,6 +1,7 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -16,14 +17,41 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
-    windowStage.getMainWindow().then((window) => {
-      let windClass: window.Window = window
+    windowStage.getMainWindow().then((win) => {
+      let windClass: window.Window = win
       // 设置窗口隐私模式
       try {
         windClass.setWindowPrivacyMode(true)
       } catch (exception) {
         console.error('Failed to set the window to privacy mode. Cause:' + JSON.stringify(exception))
       }
+
+      // 1. 设置窗口全屏
+      let isLayoutFullScreen = true;
+      windClass.setWindowLayoutFullScreen(isLayoutFullScreen).then(() => {
+        console.info('Succeeded in setting the window layout to full-screen mode.');
+      }).catch((error: BusinessError) => {
+        console.error('Failed to set the window layout to full-screen mode. Cause:' + JSON.stringify(error));
+      })
+
+      // 2 获取布局避让遮挡的区域
+      let avoidArea = windClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) // 导航栏
+      let bottomRectHeight = avoidArea.bottomRect.height; // 单位是像素px
+      AppStorage.setOrCreate('bottomRectHeight', bottomRectHeight)
+      avoidArea = windClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM) // 状态栏
+      let topRectHeight = avoidArea.topRect.height
+      AppStorage.setOrCreate("topRectHeight", topRectHeight)
+
+      windClass.on("avoidAreaChange", (data) => {
+        if (data && data.type === window.AvoidAreaType.TYPE_SYSTEM) {
+          let topRectHeight = data.area.topRect.height
+          AppStorage.setOrCreate("topRectHeight", topRectHeight)
+        } else if (data && data.type === window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
+          let bottomRectHeight = data.area.bottomRect.height
+          AppStorage.setOrCreate("bottomRectHeight", bottomRectHeight)
+        }
+      })
+
     })
 
     windowStage.loadContent('pages/Index', (err) => {

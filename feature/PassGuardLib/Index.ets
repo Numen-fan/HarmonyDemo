@@ -1,1 +1,1 @@
-// export { PassGuardMainPage } from './src/main/ets/components/PassGuardMainPage'
+export { PassGuardMainPage } from './src/main/ets/components/PassGuardMainPage'

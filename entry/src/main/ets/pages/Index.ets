@@ -1,6 +1,7 @@
 import { buffer, util } from '@kit.ArkTS';
 import { Button, promptAction, router } from '@kit.ArkUI';
-import '@feature/passguardlib/src/main/ets/components/PassGuardMainPage'
+import 'learnunits/src/main/ets/pages/LearnUnitsMainPage'
+import 'passguardlib/src/main/ets/components/PassGuardMainPage'
 import request from '@ohos.request';
 import { UIAbility } from '@kit.AbilityKit';
 import { http } from '@kit.NetworkKit';
@@ -69,20 +70,48 @@ struct Index {
       })
       this.buildFunctionItem("测试文件下载", ()=> {
         // https://cbankoss.cqrcb.com/private/account/%E5%8D%95%E7%AC%94%E7%94%B5%E5%AD%90%E5%9B%9E%E5%8D%95%E6%89%93%E5%8D%B020241119004030ic9o.png?Expires=1732552831&OSSAccessKeyId=ehwDwSpOhK66fu3M&Signature=LYfr6ywOxudEbundT%2FstN4Hla%2F8%3D&response-cache-control=no-cache
-        request.downloadFile(getContext(), {
-          url: 'https://image.baidu.com/search/down?tn=download&word=download&ie=utf8&fr=home&url=http%3A%2F%2Fgips0.baidu.com%2Fit%2Fu%3D1690853528%2C2506870245%26fm%3D3028%26app%3D3028%26f%3DJPEG%26fmt%3Dauto%3Fw%3D1024%26h%3D1024&thumbUrl=http%3A%2F%2Fgips0.baidu.com%2Fit%2Fu%3D1690853528%2C2506870245%26fm%3D3028%26app%3D3028%26f%3DJPEG%26fmt%3Dauto%3Fw%3D1024%26h%3D1024',
-          filePath:getContext().cacheDir + "/" + Date.now()
-        }).then(task=> {
-          task.on("fail",(err)=> {
-            promptAction.showToast({message: "下载失败 " + err})
+        const url = 'https://test.cqrcb.com/7D77E5C061137-SIT/00000091/1.0.0.100_all/nebula/00000091_1.0.0.100.amr';
+        // request.downloadFile(getContext(), {
+        //   url: url,
+        //   filePath:getContext().cacheDir + "/" + Date.now()
+        // }).then(task=> {
+        //   task.on("fail",(err)=> {
+        //     promptAction.showToast({message: "下载失败 " + err})
+        //     console.error("下载失败" + err)
+        //   })
+        //   task.on("complete", () => {
+        //     promptAction.showToast({message: "下载成功"})
+        //     console.error("下载成功" )
+        //   })
+        //   task.on("progress", (progress)=> {
+        //     console.warn("progress is " + progress)
+        //   })
+        // }).catch((error:BusinessError)=> {
+        //   console.error("error is " + error)
+        //   console.error("error is" + error)
+        // })
+
+
+        http.createHttp()
+          .request(url, (error: BusinessError, data: http.HttpResponse) => {
+            if (error) {
+              promptAction.showToast({
+                message: '下载失败',
+              })
+              return
+            }
+            if (data.result instanceof ArrayBuffer) {
+              let imageBuffer = data.result as ArrayBuffer;
+              promptAction.showToast({
+                message: '下载成功',
+              })
+            }
           })
-          task.on("complete", () => {
-            promptAction.showToast({message: "下载成功"})
-          })
-          task.on("progress", (progress)=> {
-            console.warn("progress is " + progress)
-          })
-        })
+
+      })
+
+      this.buildFunctionItem("跳转到档单元学习", ()=> {
+        router.pushNamedRoute({name:'LearnUnitsMainPage'})
       })
     }
     .height('100%')

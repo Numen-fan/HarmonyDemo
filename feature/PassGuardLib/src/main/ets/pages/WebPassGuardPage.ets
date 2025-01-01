@@ -3,7 +3,7 @@ import WebView from '@ohos.web.webview';
 import JSBridge from '../common/utils/JsBridge';
 import display from '@ohos.display';
 import Logger from '../common/utils/Logger';
-import { PassGuardInput } from '@ohos/libPassGuardSDK';
+import { PassGuardInput } from 'passguardlibrary';
 
 function drawCharsA(length:number) {
   console.log("####+++"+length)

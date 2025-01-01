@@ -6,7 +6,8 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "@feature/passguardlib": 'file:../feature/PassGuardLib'
+    "passguardlib": 'file:../feature/PassGuardLib',
+    "learnunits": 'file:../feature/LearnUnits'
   }
 }
 

@@ -1,0 +1,19 @@
+{
+  "routerMap": [
+    {
+      "name": "muyu",
+      "pageSourceFile": "src/main/ets/pages/muyu/view/MuyuPage.ets",
+      "buildFunction": "pageBuilder"
+    },
+    {
+      "name": "merit_record",
+      "pageSourceFile": "src/main/ets/pages/muyu/view/MeritRecordPage.ets",
+      "buildFunction": "pageBuilder"
+    },
+    {
+      "name": "painter",
+      "pageSourceFile": "src/main/ets/pages/painter/view/Painter.ets",
+      "buildFunction": "pageBuilder"
+    }
+  ]
+}
