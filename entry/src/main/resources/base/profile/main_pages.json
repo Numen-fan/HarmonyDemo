@@ -3,6 +3,8 @@
     "pages/Index",
     "pages/SplashPage",
     "pages/DialogPage",
-    "pages/WebPage"
+    "pages/WebPage",
+    "pages/MapPage",
+    "pages/SearchPage"
   ]
 }

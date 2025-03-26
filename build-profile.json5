@@ -19,7 +19,7 @@
       {
         "name": "default",
         "signingConfig": "default",
-        "compatibleSdkVersion": "5.0.0(12)",
+        "compatibleSdkVersion": "5.0.1(13)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
@@ -57,6 +57,14 @@
     {
       "name": "LearnUnits",
       "srcPath": "./feature/LearnUnits",
+    },
+    {
+      "name": "search",
+      "srcPath": "./search",
+    },
+    {
+      "name": "Net",
+      "srcPath": "./Net",
     }
   ]
 }

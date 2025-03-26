@@ -7,7 +7,13 @@
   "license": "",
   "dependencies": {
     "passguardlib": 'file:../feature/PassGuardLib',
-    "learnunits": 'file:../feature/LearnUnits'
+    "learnunits": 'file:../feature/LearnUnits',
+    "net": "file:../Net",
+    "@amap/amap_lbs_common": ">=1.1.0",
+    "@amap/amap_lbs_map3d": ">=2.1.1",
+    "@amap/amap_lbs_location": "^1.0.3",
+    "@abner/search": "file:../search",
+    "@ohos/axios": "^2.1.1"
   }
 }
 

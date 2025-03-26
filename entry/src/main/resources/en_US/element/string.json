@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "location_permission_reason",
+      "value": "用于获取您的位置信息，便于为您提供定位服务"
     }
   ]
 }

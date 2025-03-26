@@ -1,0 +1,17 @@
+{
+  "name": "@abner/search",
+  "version": "1.0.0",
+  "description": "search是一个搜索页面模版，使用它可以很快速的实现一个带有历史搜索和热门搜索的搜索页面，通过属性可以实现我们常见的搜索样式。",
+  "main": "Index.ets",
+  "keywords": [
+    "搜索",
+    "历史搜索",
+    "流失布局"
+  ],
+  "author": "AbnerMing",
+  "license": "Apache-2.0",
+  "homepage": "https://juejin.cn/user/1398234520239095",
+  "repository": "https://github.com/AbnerMing888/HarmonyOSSearchLayout",
+  "dependencies": {}
+}
+

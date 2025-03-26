@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "Net",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

@@ -53,6 +53,26 @@
       },
       {
         "name": 'ohos.permission.PRIVACY_WINDOW'
+      },
+      {
+        "name": 'ohos.permission.LOCATION',
+        "reason": "$string:location_permission_reason",
+        "usedScene": {
+          "abilities": [
+            "Harmony_location_demoAbility"
+          ],
+          "when": "always"
+        }
+      },
+      {
+        "name": "ohos.permission.APPROXIMATELY_LOCATION",
+        "reason": "$string:location_permission_reason",
+        "usedScene": {
+          "abilities": [
+            "Harmony_location_demoAbility"
+          ],
+          "when": "always"
+        }
       }
     ]
   }
