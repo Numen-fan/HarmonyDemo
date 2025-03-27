@@ -9,4 +9,23 @@ export class Constants {
    * 输入提示url
    */
   static readonly INPUT_TIPS_URL = "v3/assistant/inputtips"
+  /**
+   * 路径规划
+   */
+  static readonly ROUTE_PLAN_URl = "v3/direction/"
+
+  /**
+   * 步行
+   */
+  static readonly PLAN_WALKING = 'walking';
+
+  /**
+   * 公交
+   */
+  static readonly PLAN_TRANS ="transit/integrated"
+
+  /**
+   * 骑行
+   */
+  static readonly PLAN_BICYCLING = "bicycling"
 }

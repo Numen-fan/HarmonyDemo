@@ -9,6 +9,7 @@ import {
   MapViewManager,
   MarkerOptions,
   MyLocationStyle,
+  PolylineOptions,
 } from '@amap/amap_lbs_map3d';
 import { Constants } from "../Util/Constants";
 import { LocationUtil } from "../Util/LocationUtil";
@@ -19,6 +20,7 @@ import { ArrayList, JSON } from "@kit.ArkTS";
 import { TipBean } from '../bean/TipBean';
 import { SearchList } from '../components/SearchList';
 import { promptAction } from '@kit.ArkUI';
+import { Step } from '../bean/RoutePlan';
 
 const TAG = '[MapPage]'
 
@@ -28,7 +30,6 @@ export struct MapPage {
   private aMap?: AMap
   // 默认经纬度，天安门
   // "latitude":29.632389972857297,"longitude":106.74917376423693
-  // 106.74917376423693,29.632389972857297
   private latitude: number = 39.912393;
   private longitude: number = 116.42217;
   private adCode?: number
@@ -174,6 +175,32 @@ export struct MapPage {
       this.aMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(this.latitude, this.longitude), 15))
     } else if (func === 4) {
       // 进入到路线搜索
+      RequestUtil.queryRoute(`${this.longitude},${this.latitude}`, "106.800299,29.656026",Constants.PLAN_BICYCLING).then(resp => {
+        console.warn(TAG, JSON.stringify(resp))
+        if (resp.status !== '1') {
+          return;
+        }
+        if (resp.route && resp.route.paths && resp.route.paths[0] && resp.route.paths[0].steps) {
+          let steps: Step[] = (resp.route.paths[0].steps) as Step[]
+          let polylineOptionsList: ArrayList<LatLng> = new ArrayList<LatLng>()
+          for (let index = 0; index < steps.length; index++) {
+            const item = steps[index];
+            if (!item.polyline) {
+              continue;
+            }
+            let points = item.polyline.split(";");
+            for (let i = 0; i < points.length; i++) {
+              const point = points[i].split(",");
+              polylineOptionsList.add(new LatLng(Number(point[1]), Number(point[0])))
+            }
+          }
+          if (polylineOptionsList.length) {
+            let options: PolylineOptions = new PolylineOptions();
+            options.addAll(polylineOptionsList)
+            this.aMap?.addPolyline(options);
+          }
+        }
+      })
     }
   }
 
