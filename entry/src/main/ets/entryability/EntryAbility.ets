@@ -58,6 +58,11 @@ export default class EntryAbility extends UIAbility {
     })
 
     windowStage.loadContent('pages/MapPage', (err) => {
+      // 初始化上一次的位置
+      PersistentStorage.persistProp<number>('lastLatitude', 39.909187);
+      PersistentStorage.persistProp<number>('lastLongitude', 116.397455);
+      PersistentStorage.persistProp<number>('randomNum', 1000);
+
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
         return;

@@ -1,5 +1,6 @@
 import {
   AMap,
+  BitmapDescriptor,
   BitmapDescriptorFactory,
   CameraUpdateFactory,
   LatLng,
@@ -24,22 +25,24 @@ import { Step } from '../bean/RoutePlan';
 
 const TAG = '[MapPage]'
 
-@Entry
+@Entry({ routeName: 'MapPage' })
+@Component
 export struct MapPage {
   private mapView?: MapView
   private aMap?: AMap
   // 默认经纬度，天安门
-  // "latitude":29.632389972857297,"longitude":106.74917376423693
-  private latitude: number = 39.912393;
-  private longitude: number = 116.42217;
+  // 116.397455,39.909187
+  @StorageLink('lastLatitude') latitude: number = 39.909187;
+  @StorageLink('lastLongitude') longitude: number = 116.397455;
+  @StorageLink('randomNum') randomNum:number = 0
   private adCode?: number
   @State tipBeans: Array<TipBean> = []
+  @Provide('NavPathStack') pageStack: NavPathStack = new NavPathStack()
 
   aboutToAppear(): void {
     this.initMap();
-    this.latitude = AppStorage.get<number>('lastLatitude') || 39.912393;
-    this.longitude = AppStorage.get<number>('lastLongitude') || 116.42217;
     console.warn(TAG, `location is ${this.latitude},${this.longitude}`)
+    console.warn(TAG, `randomNum is ${this.randomNum}`)
   }
 
   initMap() {
@@ -72,8 +75,7 @@ export struct MapPage {
   async updateMap(latitude: number, longitude: number) {
     this.latitude = latitude
     this.longitude = longitude
-    AppStorage.setOrCreate<number>('lastLatitude', latitude)
-    AppStorage.setOrCreate<number>('lastLongitude', longitude)
+    console.warn(TAG, AppStorage.get<number>('lastLatitude') + "")
     try {
       this.aMap?.clear()
       // 显示蓝
@@ -149,9 +151,7 @@ export struct MapPage {
           let loc: string[] = location.split(',')
           let pointBitmap =
             await BitmapDescriptorFactory.fromRawfilePath(getContext().getApplicationContext(), "marker_icon.png");
-          let options: MarkerOptions = new MarkerOptions();
-          options.setPosition(new LatLng(Number(loc[1]), Number(loc[0])));
-          options.setIcon(pointBitmap)
+          let options: MarkerOptions = this.getPoint(Number(loc[1]), Number(loc[0]), pointBitmap as BitmapDescriptor);
           points.add(options)
         }
       }
@@ -166,6 +166,72 @@ export struct MapPage {
     this.tipBeans = [];
   }
 
+  getPoint(latitude: number, longitude: number, pointBitmap: BitmapDescriptor): MarkerOptions {
+    let options: MarkerOptions = new MarkerOptions();
+    options.setPosition(new LatLng(latitude, longitude));
+    options.setIcon(pointBitmap)
+    return options
+  }
+
+  // 进入到路线搜索, 默认驾车
+  showRouteGuide(start: string, end: string) {
+    RequestUtil.queryRoute(start, end).then(async resp => {
+      console.warn(TAG, JSON.stringify(resp))
+      if (resp.status !== '1') {
+        promptAction.showToast({ message: '路径规划失败，请稍候重试' })
+        return;
+      }
+
+      if (resp.route && resp.route.paths && resp.route.paths[0] && resp.route.paths[0].steps) {
+        let steps: Step[] = (resp.route.paths[0].steps) as Step[]
+        let polylineOptionsList: ArrayList<LatLng> = new ArrayList<LatLng>()
+        for (let index = 0; index < steps.length; index++) {
+          const item = steps[index];
+          if (!item.polyline) {
+            continue;
+          }
+          let points = item.polyline.split(";");
+          for (let i = 0; i < points.length; i++) {
+            const point = points[i].split(",");
+            polylineOptionsList.add(new LatLng(Number(point[1]), Number(point[0])))
+          }
+        }
+        if (polylineOptionsList.length) {
+          // 先移除所有的覆盖物
+          this.aMap?.clear()
+          let options: PolylineOptions = new PolylineOptions();
+          options.addAll(polylineOptionsList)
+          this.aMap?.addPolyline(options);
+          // 添加标记点，并移动到起点
+          let pointBitmap =
+            await BitmapDescriptorFactory.fromRawfilePath(getContext().getApplicationContext(), "marker_icon.png");
+          let options1: MarkerOptions = new MarkerOptions();
+          let loc1 = start.split(",")
+          options1.setPosition(new LatLng(Number(loc1[1]), Number(loc1[0])));
+          options1.setIcon(pointBitmap)
+          options1.setTitle("起点")
+          let marker = this.aMap?.addMarker(options1)
+          if (marker) {
+            marker.showInfoWindow()
+          }
+          let options2: MarkerOptions = new MarkerOptions();
+          let loc2 = end.split(",")
+          options2.setPosition(new LatLng(Number(loc2[1]), Number(loc2[0])));
+          options2.setIcon(pointBitmap)
+          options2.setTitle("终点")
+          let marker1 = this.aMap?.addMarker(options2)
+          if (marker1) {
+            marker1.showInfoWindow()
+          }
+          // 我的位置
+          this.aMap?.addMarker(await this.getMyLocationPoint())
+          // 移动到起点
+          this.aMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Number(loc1[1]), Number(loc1[0])), 15))
+        }
+      }
+    })
+  }
+
   funcClick(func: number) {
     if (func === 1) {
       this.aMap?.moveCamera(CameraUpdateFactory.zoomIn())
@@ -174,56 +240,75 @@ export struct MapPage {
     } else if (func === 3) {
       this.aMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(this.latitude, this.longitude), 15))
     } else if (func === 4) {
-      // 进入到路线搜索
-      RequestUtil.queryRoute(`${this.longitude},${this.latitude}`, "106.800299,29.656026",Constants.PLAN_BICYCLING).then(resp => {
-        console.warn(TAG, JSON.stringify(resp))
-        if (resp.status !== '1') {
-          return;
-        }
-        if (resp.route && resp.route.paths && resp.route.paths[0] && resp.route.paths[0].steps) {
-          let steps: Step[] = (resp.route.paths[0].steps) as Step[]
-          let polylineOptionsList: ArrayList<LatLng> = new ArrayList<LatLng>()
-          for (let index = 0; index < steps.length; index++) {
-            const item = steps[index];
-            if (!item.polyline) {
-              continue;
-            }
-            let points = item.polyline.split(";");
-            for (let i = 0; i < points.length; i++) {
-              const point = points[i].split(",");
-              polylineOptionsList.add(new LatLng(Number(point[1]), Number(point[0])))
-            }
-          }
-          if (polylineOptionsList.length) {
-            let options: PolylineOptions = new PolylineOptions();
-            options.addAll(polylineOptionsList)
-            this.aMap?.addPolyline(options);
-          }
+      // 进入路线搜索页面
+      this.pageStack.pushPathByName("route_search", `${this.longitude},${this.latitude}`, (data) => {
+        console.warn(TAG, "pushPathByName back", JSON.stringify(data))
+        let result = data.result as object
+        if (result) {
+          this.showRouteGuide(result['start'] as string, result['end'] as string)
         }
       })
+    } else if (func === 5) {
+      this.showRandomPoint()
+    } else if (func === 6) {
+      this.pageStack.pushPathByName("setting", null, false)
     }
   }
 
-  build() {
-    Stack({ alignContent: Alignment.Top }) {
-      MapViewComponent()
-        .width('100%')
-        .height('100%')
-      SearchComponent({
-        onSubmit: (value) => {
-          this.startSearch(value)
-        },
-        onChange: () => {
-          this.tipBeans = []
-        },
-        content: () => {
-          this.searchContent()
-        }
-      })
-
-      this.funcAreaComponent()
-
+  async showRandomPoint() {
+    console.warn(TAG, "num = " + this.randomNum)
+    if (this.randomNum <= 0) {
+      promptAction.showToast({ message: "至少要1个点" })
+      return
     }
+    // 生成围绕当前经纬度周围的点数
+    const earthRadiusKm = 6371; // 地球半径（千米）
+    let points: ArrayList<MarkerOptions> = new ArrayList<MarkerOptions>()
+    let pointBitmap =
+      await BitmapDescriptorFactory.fromRawfilePath(getContext().getApplicationContext(), "marker_icon.png");
+    for (let i = 0; i < this.randomNum; i++) {
+      // 生成极坐标下的随机半径和角度
+      const r = Math.sqrt(Math.random()) * this.randomNum / 1000; // 使点均匀分布在圆内
+      const theta = Math.random() * 2 * Math.PI;
+
+      // 转换为地理坐标
+      const deltaLat = (r / earthRadiusKm) * (180 / Math.PI);
+      const deltaLng = (r / earthRadiusKm) * (180 / Math.PI) / Math.cos(this.latitude * Math.PI / 180);
+
+      const lat = this.latitude + deltaLat * Math.sin(theta);
+      const lng = this.longitude + deltaLng * Math.cos(theta);
+
+      let options: MarkerOptions = this.getPoint(lat, lng, pointBitmap as BitmapDescriptor);
+      points.add(options)
+    }
+    points.add(await this.getMyLocationPoint())
+    this.aMap?.clear()
+    this.aMap?.addMarkers(points)
+  }
+
+  build() {
+    Navigation(this.pageStack) {
+      Stack({ alignContent: Alignment.Top }) {
+        MapViewComponent()
+          .width('100%')
+          .height('100%')
+        SearchComponent({
+          onSubmit: (value) => {
+            this.startSearch(value)
+          },
+          onChange: () => {
+            this.tipBeans = []
+          },
+          content: () => {
+            this.searchContent()
+          }
+        })
+
+        this.funcAreaComponent()
+
+      }
+    }.mode(NavigationMode.Stack)
+    .hideToolBar(true)
   }
 
   @Builder
@@ -245,7 +330,7 @@ export struct MapPage {
 
   @Builder
   funcAreaComponent() {
-    Column({ space: 10 }) {
+    Column({ space: 16 }) {
       // 放大
       Image($r('app.media.icon_larger'))
         .width(this.iconSize)
@@ -274,6 +359,19 @@ export struct MapPage {
         .onClick(() => {
           this.funcClick(4)
         })
+      Image($r('app.media.icon_random'))
+        .width(this.iconSize)
+        .height(this.iconSize)
+        .onClick(() => {
+          this.funcClick(5)
+        })
+      Image($r('app.media.icon_setting'))
+        .width(this.iconSize)
+        .height(this.iconSize)
+        .onClick(() => {
+          this.funcClick(6)
+        })
+
     }
     .width(50)
     .padding(10)
@@ -286,3 +384,4 @@ export struct MapPage {
     .margin(10); // 可选：避免内容紧贴边缘
   }
 }
+

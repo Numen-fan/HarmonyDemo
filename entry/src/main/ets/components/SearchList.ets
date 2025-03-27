@@ -4,8 +4,7 @@ import { TipBean } from "../bean/TipBean"
 export struct SearchList {
   @Prop
   tipBeans: Array<TipBean>
-  showOnMap: () => void = () => {
-  }
+  showOnMap?: () => void
   onItemClick: (item: TipBean) => void = (item: TipBean) => {
   }
 
@@ -21,7 +20,7 @@ export struct SearchList {
       Line()
         .backgroundColor(Color.Gray)
         .width('100%')
-        .margin({top: 3})
+        .margin({ top: 3 })
     }
     .alignItems(HorizontalAlign.Start)
     .justifyContent(FlexAlign.Center)
@@ -36,7 +35,7 @@ export struct SearchList {
               if (item.name && item.location && item.location.indexOf(',') > 0) {
                 this.tipItem(item.name, item.address)
               }
-            }.onClick(()=> {
+            }.onClick(() => {
               this.onItemClick(item)
             })
           })
@@ -44,10 +43,14 @@ export struct SearchList {
 
         Button("地图上查看", { type: ButtonType.Normal, stateEffect: true })
           .onClick(() => {
-            this.showOnMap()
-          }).width('80%')
+            if (this.showOnMap) {
+              this.showOnMap()
+            }
+          })
+          .width('80%')
           .borderRadius(20)
-          .margin({top:10})
+          .margin({ top: 10 })
+          .visibility(this.showOnMap ? Visibility.Visible : Visibility.Hidden)
         Blank()
           .height(10)
       }
@@ -56,7 +59,7 @@ export struct SearchList {
       .borderRadius(10)
       .alignItems(HorizontalAlign.Center)
       .visibility(this.tipBeans && this.tipBeans.length > 0 ? Visibility.Visible : Visibility.Hidden)
-      .padding({top: 10})
+      .padding({ top: 10 })
     }
   }
 }
