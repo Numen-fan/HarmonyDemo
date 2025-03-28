@@ -1,9 +1,12 @@
 import { AppBar } from "../components/AppBar"
+import { promptAction } from "@kit.ArkUI"
 
 @Component
+@Preview
 export struct SettingPage {
   @Consume('NavPathStack') pageStack: NavPathStack
   @StorageLink('randomNum') randomNum: number = 0
+  @StorageLink('preferSearch') preferSearch: string = ''
 
   @Builder
   title() {
@@ -34,18 +37,34 @@ export struct SettingPage {
 
   build() {
     NavDestination() {
-      Column() {
+      Column({ space: 10 }) {
         this.appBar()
         Row() {
-          Text("随机点数")
+          Text("随机生成点数")
           TextInput({ text: this.randomNum.toString() })
             .onChange((value) => {
               this.randomNum = Number(value)
             })
             .type(InputType.Number)
             .margin({ left: 10 })
+            .layoutWeight(1)
         }
-        .width('100%')
+
+        Row() {
+          Text("添加常用搜索")
+          TextInput({ placeholder: "请输入地点" })
+            .enterKeyType(EnterKeyType.Done)
+            .onSubmit((enterKey: EnterKeyType, event: SubmitEvent) => {
+              let value = event.text
+              if (value.length < 1 || this.preferSearch.indexOf(value) >= 0) {
+                return
+              }
+              this.preferSearch += `|${value}`
+              promptAction.showToast({ message: "添加成功" })
+            })
+            .margin({ left: 10 })
+            .layoutWeight(1)
+        }
       }.height('100%')
       .width('100%')
       .padding(10)

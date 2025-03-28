@@ -34,15 +34,19 @@ export struct MapPage {
   // 116.397455,39.909187
   @StorageLink('lastLatitude') latitude: number = 39.909187;
   @StorageLink('lastLongitude') longitude: number = 116.397455;
-  @StorageLink('randomNum') randomNum:number = 0
+  @StorageLink('preferSearch') preferSearch: string = ''
+  @StorageLink('randomNum') randomNum: number = 0
   private adCode?: number
   @State tipBeans: Array<TipBean> = []
   @Provide('NavPathStack') pageStack: NavPathStack = new NavPathStack()
+  @State preferShow: boolean = false;
+  @State searchText: string = ''
 
   aboutToAppear(): void {
     this.initMap();
     console.warn(TAG, `location is ${this.latitude},${this.longitude}`)
     console.warn(TAG, `randomNum is ${this.randomNum}`)
+    console.warn(TAG, 'preferSearch is ' + this.preferSearch)
   }
 
   initMap() {
@@ -100,6 +104,7 @@ export struct MapPage {
   }
 
   startSearch(keywords: string) {
+    this.searchText = keywords
     if (!(keywords && keywords.length)) {
       return
     }
@@ -120,6 +125,7 @@ export struct MapPage {
    * @param name
    */
   async locationToPoint(location: string | undefined, name: string | undefined) {
+    this.searchText = name as string
     if (location && location.indexOf(',') > 0) {
       let loc: string[] = location.split(',')
       let pointBitmap =
@@ -293,14 +299,29 @@ export struct MapPage {
           .width('100%')
           .height('100%')
         SearchComponent({
+          searchText: this.searchText,
           onSubmit: (value) => {
             this.startSearch(value)
           },
           onChange: () => {
-            this.tipBeans = []
+            if (!this.searchText.length) {
+              this.preferShow = true
+              this.tipBeans = []
+            }
           },
           content: () => {
             this.searchContent()
+          },
+          preferSearchContent: () => {
+            this.preferSearchContent()
+          },
+          onFocusChange: (focus: boolean) => {
+            if (focus) {
+              this.preferShow = this.tipBeans === null || this.tipBeans.length <= 0
+            } else {
+              this.preferShow = false
+            }
+
           }
         })
 
@@ -314,13 +335,42 @@ export struct MapPage {
   @Builder
   searchContent() {
     SearchList({
-      tipBeans: this.tipBeans, showOnMap: () => {
+      tipBeans: this.tipBeans,
+      showOnMap: () => {
         this.showOnMap()
-      }, onItemClick: (item: TipBean) => {
+      },
+      onItemClick: (item: TipBean) => {
         this.tipBeans = []
         this.locationToPoint(item.location, item.name);
       }
     })
+  }
+
+  @Builder
+  preferSearchContent() {
+    Column() {
+      Flex({ wrap: FlexWrap.Wrap }) {
+        ForEach(this.preferSearch.split('|'), (item: string) => {
+          Text(item)
+            .onClick(() => {
+              this.preferShow = false
+              this.startSearch(item)
+            })
+            .gesture(LongPressGesture({ repeat: true }).onAction(() => {
+              // 删除
+              this.preferSearch = this.preferSearch.replace(`|${item}`, '')
+            }))
+            .fontSize(20)
+            .margin({ left: 10, top:10 })
+        })
+      }
+      Text("长按可以可删除")
+        .fontColor(Color.Gray)
+        .margin({top:20})
+    }.width("100%")
+    .borderRadius(10)
+    .backgroundColor(Color.White)
+    .visibility(this.preferShow ? Visibility.Visible : Visibility.None)
   }
 
   /**

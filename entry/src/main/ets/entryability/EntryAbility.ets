@@ -24,7 +24,7 @@ export default class EntryAbility extends UIAbility {
       let windClass: window.Window = win
       // 设置窗口隐私模式
       try {
-        windClass.setWindowPrivacyMode(true)
+        windClass.setWindowPrivacyMode(false)
       } catch (exception) {
         console.error('Failed to set the window to privacy mode. Cause:' + JSON.stringify(exception))
       }
@@ -62,6 +62,7 @@ export default class EntryAbility extends UIAbility {
       PersistentStorage.persistProp<number>('lastLatitude', 39.909187);
       PersistentStorage.persistProp<number>('lastLongitude', 116.397455);
       PersistentStorage.persistProp<number>('randomNum', 1000);
+      PersistentStorage.persistProp<string>('preferSearch', "学校|医院|银行|加油站|火车站|便利店");
 
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
