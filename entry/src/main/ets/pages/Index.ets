@@ -1,18 +1,23 @@
 import { buffer, util } from '@kit.ArkTS';
-import { Button, promptAction, router } from '@kit.ArkUI';
+import { Button, display, promptAction, router } from '@kit.ArkUI';
 import 'learnunits/src/main/ets/pages/LearnUnitsMainPage'
 import 'passguardlib/src/main/ets/components/PassGuardMainPage'
-import request from '@ohos.request';
-import { UIAbility } from '@kit.AbilityKit';
+import { common, UIAbility } from '@kit.AbilityKit';
 import { http } from '@kit.NetworkKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { DDApi } from '../Util/DDApiEventHandlerImpl';
+import { IDDShareApi } from '@dingtalk/ddsharesdk';
 
 @Entry
 @Component
 struct Index {
+  private mDDShareAPI: IDDShareApi | undefined = undefined;
+  private context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   @State message: string = 'Hello World';
   private iconStr: ResourceStr = $r("app.media.app_icon")
   private idList: string[] = ['123', '123423', '234234', '2342342', '23423423']
+  @StorageProp('topRectHeight')
+  topRectHeight: number = 0
 
   private customDialogComponentId: number = 0
 
@@ -47,75 +52,100 @@ struct Index {
       })
     }
   }
+  aboutToAppear(): void {
+    this.mDDShareAPI = DDApi;
+    // this.copyFile();
+    this.context.eventHub.on("foldStatusChange", (data:display.FoldStatus) => {
+      this.getUIContext().getPromptAction().showToast({message:`折叠状态发生变化：当前为${data == display.FoldStatus.FOLD_STATUS_EXPANDED ? "展开" : "折叠"}状态`})
+    })
+  }
 
   build() {
-    Column() {
-      this.buildFunctionItem("跳转密码键盘", ()=> {
-        router.pushNamedRoute({name: 'PassGuardMainPage'})
-      })
-      this.buildFunctionItem("跳转输入弹窗失焦测试页面", () => {
-        router.pushUrl({url:"pages/DialogPage"})
-      })
-      this.buildFunctionItem("跳转WebView测试页面", () => {
-        router.pushUrl({url:"pages/WebPage"})
-      })
-      this.buildFunctionItem("promptAction.openCustomDialog", () => {
-        promptAction.openCustomDialog({
-          builder:()=> {
-            this.customDialogComponent()
-          }
-        }).then((id)=> {
-          this.customDialogComponentId = id;
-        })
-      })
-      this.buildFunctionItem("测试文件下载", ()=> {
-        // https://cbankoss.cqrcb.com/private/account/%E5%8D%95%E7%AC%94%E7%94%B5%E5%AD%90%E5%9B%9E%E5%8D%95%E6%89%93%E5%8D%B020241119004030ic9o.png?Expires=1732552831&OSSAccessKeyId=ehwDwSpOhK66fu3M&Signature=LYfr6ywOxudEbundT%2FstN4Hla%2F8%3D&response-cache-control=no-cache
-        const url = 'https://test.cqrcb.com/7D77E5C061137-SIT/00000091/1.0.0.100_all/nebula/00000091_1.0.0.100.amr';
-        // request.downloadFile(getContext(), {
-        //   url: url,
-        //   filePath:getContext().cacheDir + "/" + Date.now()
-        // }).then(task=> {
-        //   task.on("fail",(err)=> {
-        //     promptAction.showToast({message: "下载失败 " + err})
-        //     console.error("下载失败" + err)
-        //   })
-        //   task.on("complete", () => {
-        //     promptAction.showToast({message: "下载成功"})
-        //     console.error("下载成功" )
-        //   })
-        //   task.on("progress", (progress)=> {
-        //     console.warn("progress is " + progress)
-        //   })
-        // }).catch((error:BusinessError)=> {
-        //   console.error("error is " + error)
-        //   console.error("error is" + error)
+    Scroll() {
+      Column() {
+        // this.buildFunctionItem("跳转密码键盘", ()=> {
+        //   router.pushNamedRoute({name: 'PassGuardMainPage'})
         // })
-
-
-        http.createHttp()
-          .request(url, (error: BusinessError, data: http.HttpResponse) => {
-            if (error) {
-              promptAction.showToast({
-                message: '下载失败',
-              })
-              return
+        this.buildFunctionItem("跳转输入弹窗失焦测试页面", () => {
+          router.pushUrl({url:"pages/DialogPage"})
+        })
+        this.buildFunctionItem("跳转WebView测试页面", () => {
+          router.pushUrl({url:"pages/WebPage"})
+        })
+        this.buildFunctionItem("promptAction.openCustomDialog", () => {
+          promptAction.openCustomDialog({
+            builder:()=> {
+              this.customDialogComponent()
             }
-            if (data.result instanceof ArrayBuffer) {
-              let imageBuffer = data.result as ArrayBuffer;
-              promptAction.showToast({
-                message: '下载成功',
-              })
-            }
+          }).then((id)=> {
+            this.customDialogComponentId = id;
           })
+        })
+        this.buildFunctionItem("测试文件下载", ()=> {
+          // https://cbankoss.cqrcb.com/private/account/%E5%8D%95%E7%AC%94%E7%94%B5%E5%AD%90%E5%9B%9E%E5%8D%95%E6%89%93%E5%8D%B020241119004030ic9o.png?Expires=1732552831&OSSAccessKeyId=ehwDwSpOhK66fu3M&Signature=LYfr6ywOxudEbundT%2FstN4Hla%2F8%3D&response-cache-control=no-cache
+          const url = 'https://test.cqrcb.com/7D77E5C061137-SIT/00000091/1.0.0.100_all/nebula/00000091_1.0.0.100.amr';
+          // request.downloadFile(getContext(), {
+          //   url: url,
+          //   filePath:getContext().cacheDir + "/" + Date.now()
+          // }).then(task=> {
+          //   task.on("fail",(err)=> {
+          //     promptAction.showToast({message: "下载失败 " + err})
+          //     console.error("下载失败" + err)
+          //   })
+          //   task.on("complete", () => {
+          //     promptAction.showToast({message: "下载成功"})
+          //     console.error("下载成功" )
+          //   })
+          //   task.on("progress", (progress)=> {
+          //     console.warn("progress is " + progress)
+          //   })
+          // }).catch((error:BusinessError)=> {
+          //   console.error("error is " + error)
+          //   console.error("error is" + error)
+          // })
 
-      })
 
-      this.buildFunctionItem("跳转到档单元学习", ()=> {
-        router.pushNamedRoute({name:'LearnUnitsMainPage'})
-      })
+          http.createHttp()
+            .request(url, (error: BusinessError, data: http.HttpResponse) => {
+              if (error) {
+                promptAction.showToast({
+                  message: '下载失败',
+                })
+                return
+              }
+              if (data.result instanceof ArrayBuffer) {
+                let imageBuffer = data.result as ArrayBuffer;
+                promptAction.showToast({
+                  message: '下载成功',
+                })
+              }
+            })
+
+        })
+
+        this.buildFunctionItem("跳转到档单元学习", ()=> {
+          router.pushNamedRoute({name:'LearnUnitsMainPage'})
+        })
+
+        this.buildFunctionItem("钉钉分享", ()=> {
+          if (!this.mDDShareAPI?.isDDAppInstalled()) {
+            promptAction.showToast({message: '没安装钉钉'})
+          }
+          this.mDDShareAPI?.openDDApp(this.context);
+        })
+
+        this.buildFunctionItem("折叠屏检测", ()=> {
+          if (display.isFoldable()) {
+            this.getUIContext().getPromptAction().showToast({message: "当前设备为折叠屏，处于" + (display.getFoldStatus() == display.FoldStatus.FOLD_STATUS_EXPANDED ? "展开状态" : "折叠状态")})
+          } else {
+            this.getUIContext().getPromptAction().showToast({message: "当前设备非折叠屏"})
+          }
+        })
+      }
+      .height('100%')
+      .width('100%')
     }
-    .height('100%')
-    .width('100%')
+    .margin({top:this.getUIContext().px2vp(this.topRectHeight)})
   }
 
   @Builder

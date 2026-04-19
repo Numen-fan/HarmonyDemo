@@ -20,6 +20,7 @@
         "name": "default",
         "signingConfig": "default",
         "compatibleSdkVersion": "5.0.1(13)",
+        "targetSdkVersion": "5.1.0(18)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
@@ -65,6 +66,10 @@
     {
       "name": "Net",
       "srcPath": "./Net",
+    },
+    {
+      "name": "BaseLearnunit",
+      "srcPath": "./feature/BaseLearnunit",
     }
   ]
 }

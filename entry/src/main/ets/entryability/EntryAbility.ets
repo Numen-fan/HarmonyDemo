@@ -1,11 +1,13 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { window } from '@kit.ArkUI';
+import { display, promptAction, window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { LocationUtil } from '../Util/LocationUtil';
+import { DDApi, DDEventHandle } from '../Util/DDApiEventHandlerImpl';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    this.handleDingTalkCallIfNeed(want);
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     // this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT);
   }
@@ -57,7 +59,7 @@ export default class EntryAbility extends UIAbility {
 
     })
 
-    windowStage.loadContent('pages/MapPage', (err) => {
+    windowStage.loadContent('pages/Index', (err) => {
       // 初始化上一次的位置
       PersistentStorage.persistProp<number>('lastLatitude', 39.909187);
       PersistentStorage.persistProp<number>('lastLongitude', 116.397455);
@@ -70,6 +72,12 @@ export default class EntryAbility extends UIAbility {
       }
       hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
     });
+
+    display.on('foldStatusChange', (data:display.FoldStatus) => {
+      this.context.eventHub.emit("foldStatusChange", data)
+      // promptAction.openToast({message:`折叠状态发生变化：当前为${data == display.FoldStatus.FOLD_STATUS_EXPANDED ? "展开" : "折叠"}状态`})
+    })
+
   }
 
   onWindowStageDestroy(): void {
@@ -85,5 +93,14 @@ export default class EntryAbility extends UIAbility {
   onBackground(): void {
     // Ability has back to background
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground');
+  }
+
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onNewWant');
+    this.handleDingTalkCallIfNeed(want);
+  }
+
+  private  handleDingTalkCallIfNeed(want: Want) {
+    DDApi.handleWant(want, DDEventHandle);
   }
 }
